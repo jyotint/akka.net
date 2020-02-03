@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  movie-playback-system-consoleui:
+    build:
+      context: .
+      dockerfile: ./MoviePlaybackSystem.ConsoleUI/Dockerfile
+    image: movie-playback-system-consoleui:1.0
+#     networks: 
+#       - movie-playback-system-backend
+#     environment:
+#     ports:
+#     depends_on: 
+#     restart: 
+
+# networks: 
+#   movie-playback-system-backend:
