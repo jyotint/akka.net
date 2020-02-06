@@ -6,9 +6,9 @@ namespace MoviePlaybackSystem.Shared
 {
     public static class Constants
     {
-        public static readonly string ActorSystemName = "MovieStreamingActorSystem";
+        public static readonly string ActorSystemName = "MoviePlaybackActorSystem";
         public static readonly string ActorNamePlaybackActor = "PlaybackActor";
-        public static readonly string ActorNameNewPlaybackActor = "NewPlaybackActor";
+        public static readonly string ActorNameUserActor = "UserActor";
         public static readonly int HandleMessageFromUserId = 42;
     }
 }

@@ -1,9 +1,32 @@
 using System;
+using Akka.Actor;
 
 namespace MoviePlaybackSystem.Shared.Utils
 {
     public static class ColoredConsole
     {
+        public static void LogSendMessage(string messageType)
+        {
+            ColoredConsole.WriteSentMessage($"Sending (Telling) '{messageType}' message...");
+        }
+        public static void LogSendMessage(string messageType, string messageData)
+        {
+            ColoredConsole.WriteSentMessage($"Sending (Telling) '{messageType}' message [{messageData}]...");
+        }
+        public static void LogSendMessage(string messageType, IActorRef actorRef)
+        {
+            ColoredConsole.WriteSentMessage($"Sending (Telling) '{messageType}' message to {GetActorInformation(actorRef)}...");
+        }
+        public static void LogSendMessage(string messageType, string messageData, IActorRef actorRef)
+        {
+            ColoredConsole.WriteSentMessage($"Sending (Telling) '{messageType}' message [{messageData}] to {GetActorInformation(actorRef)}...");
+        }
+
+        public static string GetActorInformation(IActorRef actorRef)
+        {
+            return (actorRef == null) ? "" : $"'{actorRef.Path.Name}' ({actorRef.Path.ToStringWithAddress()})";
+        }
+
         public static void WriteTitle(string message) => WriteLineInColor(message, ConsoleColor.DarkYellow);
         public static void WriteError(string message) => WriteLineInColor(message, ConsoleColor.Red);
         public static void WriteCreationEvent(string message) => WriteLineInColor(message, ConsoleColor.Cyan);
