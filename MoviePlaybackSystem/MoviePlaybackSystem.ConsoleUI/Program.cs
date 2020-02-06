@@ -14,30 +14,25 @@ namespace MoviePlaybackSystem
 
         static void Main(string[] args)
         {
-            ColoredConsole.WriteTitle("DemoAkkaNet02: Running Akka.NET demo...");
+            ColoredConsole.WriteTitle("MoviePlaybackSystem: Running Akka.NET demo...");
 
             // Create an ActionSystem
             _movieStreamingActorSystem = ActorSystem.Create(Constants.ActorSystemName);
             ColoredConsole.WriteCreationEvent($"CREATED '{Constants.ActorSystemName}' ActorSystem.");
 
-            Props playbackActorProps = Props.Create<PlaybackActor>();
-
-            // Create PlaybackActor using Props
-            IActorRef playbackActorRef = _movieStreamingActorSystem.ActorOf(playbackActorProps, Constants.ActorNamePlaybackActor);
+            // Create Props for UserActor and then create it
+            IActorRef userActorRef = _movieStreamingActorSystem.ActorOf(UserActor.Props(), Constants.ActorNameUserActor);
 
             // Send PlayMovieMessage to PlaybackActor
-            ColoredConsole.WriteSentMessage("Sending (Telling) PlayMovieMessage messages...");
-            playbackActorRef.Tell(new PlayMovieMessage("Blood Diamond", 42));
-            playbackActorRef.Tell(new PlayMovieMessage("The Departed", 51));
+            SendPlayMovieMessage(userActorRef, new PlayMovieMessage("Blood Diamond", 42));
+            SendPlayMovieMessage(userActorRef, new PlayMovieMessage("The Departed", 51));
 
-            // Action - 004: Send PoisonPill message
-            ColoredConsole.WriteSentMessage("Sending (Telling) PoisonPill message...");
-            playbackActorRef.Tell(PoisonPill.Instance);
+            // Send StopMovieMessage to UserActor
+            SendStopMovieMessage(userActorRef, new StopMovieMessage(42));
+            SendStopMovieMessage(userActorRef, new StopMovieMessage(51));
 
-            // Action - 005: Send PlayMovieMessage to PlaybackActor
-            ColoredConsole.WriteSentMessage("Sending (Telling) PlayMovieMessage messages...");
-            playbackActorRef.Tell(new PlayMovieMessage("Usual Suspect", 42));
-
+            // Send PlayMovieMessage to PlaybackActor
+            SendPlayMovieMessage(userActorRef, new PlayMovieMessage("Usual Suspect", 42));
 
 
             Console.WriteLine("  Press ENTER key to terminate ActorSystem...");
@@ -53,6 +48,18 @@ namespace MoviePlaybackSystem
 
             ColoredConsole.WriteUserPrompt("  Press ENTER key to close the application...");
             ColoredConsole.WriteUserPrompt("");
+        }
+
+        private static void SendPlayMovieMessage(IActorRef actorRef, PlayMovieMessage pmm)
+        {
+            ColoredConsole.LogSendMessage("PlayMovieMessage", pmm.ToString(), actorRef);
+            actorRef.Tell(pmm);
+        }
+
+        private static void SendStopMovieMessage(IActorRef actorRef, StopMovieMessage smm)
+        {
+            ColoredConsole.LogSendMessage("StopMovieMessage", smm.ToString(), actorRef);
+            actorRef.Tell(smm);
         }
     }
 }
