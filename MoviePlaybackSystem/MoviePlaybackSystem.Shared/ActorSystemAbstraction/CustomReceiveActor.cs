@@ -2,7 +2,7 @@ using Akka.Actor;
 using MoviePlaybackSystem.Shared.Utils;
 using System;
 
-namespace MoviePlaybackSystem.Shared.Actor
+namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 {
     public class CustomReceiveActor : ReceiveActor
     {

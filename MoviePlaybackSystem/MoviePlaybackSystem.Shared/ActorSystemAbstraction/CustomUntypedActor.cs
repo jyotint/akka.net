@@ -2,14 +2,14 @@ using Akka.Actor;
 using MoviePlaybackSystem.Shared.Utils;
 using System;
 
-namespace MoviePlaybackSystem.Shared.Actor
+namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 {
     public abstract class CustomUntypedActor : UntypedActor
     {
         public CustomUntypedActor()
         {
-            ColoredConsole.WriteCreationEvent($"CREATING '{Self.Path.Name}' actor with address '{Self.Path.ToString()}'.");
-            //ColoredConsole.WriteCreationEvent($"  Name: '{Self.Path.Name}', '{Self.Path.Uid}', '{Self.Path.Address}', '{Self.Path.Parent}', '{Self.Path.Root}'.");
+            // ColoredConsole.WriteCreationEvent($"CREATING '{Self.Path.Name}' actor with address '{Self.Path.ToString()}'.");
+            // ColoredConsole.WriteCreationEvent($"  Name: '{Self.Path.Name}', '{Self.Path.Uid}', '{Self.Path.Address}', '{Self.Path.Parent}', '{Self.Path.Root}'.");
         }
 
         #region Public Read-only properties
@@ -27,10 +27,21 @@ namespace MoviePlaybackSystem.Shared.Actor
             get 
             { 
                 return Self.Path.ToString();
-            } 
+            }
         }
 
         #endregion // Actor Lifecyle Hooks
+
+        #region Public Methods
+
+        public void SendMessageAsynchronous(object message)
+        {
+            ColoredConsole.LogSendAsynchronousMessage(message.GetType().Name, message.ToString(), Self);
+            Self.Tell(message);
+        }
+
+        #endregion // Public Methods
+
 
         #region Actor Lifecyle Hooks
 
