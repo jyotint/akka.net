@@ -1,3 +1,4 @@
+using MoviePlaybackSystem.Shared.ActorSystemAbstraction;
 using MoviePlaybackSystem.Shared.Message;
 using MoviePlaybackSystem.Shared.Utils;
 
@@ -6,64 +7,78 @@ namespace MoviePlaybackSystem.Shared.Actor
     // Action-003 - Create an untyped actor
     public class UserActor : CustomUntypedActor
     {
+        private int _userId;
         private PlayMovieMessage _currentlyPlaying;
 
-        public UserActor()
+        public UserActor(int userId)
         {
+            ColoredConsole.WriteCreationEvent($"  [{this.ActorName}] '{ActorName}' actor constructor.");
+            _userId = userId;
             _currentlyPlaying = null;
-            ColoredConsole.WriteCreationEvent($"CREATED '{ActorName}' Actor.");
 
             // Initial behavior
             Become(StoppedBehavior);
         }
 
-        public static Akka.Actor.Props Props()
+        public static string GetActorName(int userId)
         {
-            return Akka.Actor.Props.Create<UserActor>(() => new UserActor());
+            return Constants.ActorNameUserActorPrefix + userId; //"-" + userId;
+        }
+
+        public static Akka.Actor.IActorRef Create(int userId)
+        {
+            return Context.ActorOf(UserActor.Props(userId), GetActorName(userId));
+        }
+
+        public static Akka.Actor.Props Props(int userId)
+        {
+            return Akka.Actor.Props.Create<UserActor>(() => new UserActor(userId));
         }
 
         protected override void OnReceive(object message)
         {
-            ColoredConsole.WriteReceivedMessage($"  Received Message on '{Constants.ActorNameUserActor}' Actor...");
+            ColoredConsole.WriteReceivedMessage($"  [{this.ActorName}] OnReceive(): Received Message on '{this.ActorName}' Actor...");
 
-            if(message is PlayMovieMessage pmm)
+            switch(message)
             {
-                Become(PlayingMovieBehavior);
-            }
-            else if(message is StopMovieMessage smm)
-            {
-                Become(StoppedBehavior);
-            }
-            else
-            {
-                ColoredConsole.WriteReceivedMessage($"    OnReceive(): ERROR: Unknown '{message.GetType().ToString()}' type received!");
-                Unhandled(message);
+                case PlayMovieMessage pmm:
+                    Become(PlayingMovieBehavior);
+                    break;
+                case StopMovieMessage smm:
+                    Become(StoppedBehavior);
+                    break;
+                default:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] OnReceive(): ERROR: Unknown '{message.GetType().ToString()}' type received!");
+                    Unhandled(message);
+                    break;
             }
         }
 
         private void PlayingMovieBehavior(object message)
         {
-            if(message is PlayMovieMessage pmm)
+            switch(message)
             {
-                ColoredConsole.WriteReceivedMessage($"    ERROR: Already playing movie! PlayMovieMessage message received --> {pmm.ToString()}.");
-            }
-            else if(message is StopMovieMessage smm)
-            {
-                ColoredConsole.WriteReceivedMessage($"    StopMovieMessage message received --> {smm.ToString()}.");
-                StopPlayingMovie(message as StopMovieMessage);
+                case PlayMovieMessage pmm:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] ERROR: Already playing movie! PlayMovieMessage message received --> {pmm.ToString()}.");
+                    break;
+                case StopMovieMessage smm:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] StopMovieMessage message received --> {smm.ToString()}.");
+                    StopPlayingMovie(smm);
+                    break;
             }
         }
 
         private void StoppedBehavior(object message)
         {
-            if(message is PlayMovieMessage pmm)
+            switch(message)
             {
-                ColoredConsole.WriteReceivedMessage($"    PlayMovieMessage message received --> {pmm.ToString()}.");
-                StartPlayingMovie(message as PlayMovieMessage);
-            }
-            else if(message is StopMovieMessage smm)
-            {
-                ColoredConsole.WriteReceivedMessage($"    ERROR: Can't stop if nothing is playing! StopMovieMessage message received --> {smm.ToString()}.");
+                case PlayMovieMessage pmm:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] PlayMovieMessage message received --> {pmm.ToString()}.");
+                    StartPlayingMovie(pmm);
+                    break;
+                case StopMovieMessage smm:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] ERROR: Can't stop if nothing is playing! StopMovieMessage message received --> {smm.ToString()}.");
+                    break;
             }
         }
 
