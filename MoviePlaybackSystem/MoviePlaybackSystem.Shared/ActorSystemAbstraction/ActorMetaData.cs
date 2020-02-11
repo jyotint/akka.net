@@ -6,17 +6,13 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
     /// </summary>
     public class ActorMetaData
     {
-        public ActorMetaData(string name, ActorMetaData parent = null, string suffix = null)
+        public ActorMetaData(string name, ActorMetaData parent = null, string nameSuffix = null)
         {
-            Name = name;
+            Name = (nameSuffix == null) ? name : name + nameSuffix;
             Parent = parent;
             // if no parent, we assume a top-level actor
             var parentPath = parent != null ? parent.Path : "/user";
             Path = string.Format("{0}/{1}", parentPath, Name);
-            if(suffix != null)
-            {
-                Path = Path + suffix;
-            }
         }
 
         public string Name { get; private set; }

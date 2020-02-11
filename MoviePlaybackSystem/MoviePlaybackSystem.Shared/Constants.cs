@@ -12,7 +12,6 @@ namespace MoviePlaybackSystem.Shared
         public static readonly string ActorNameUserCoordinatorActor = "UserCoordinatorActor";
         public static readonly string ActorNameUserActorPrefix = "UserActor";
 
-        public static readonly char CommandSeparator = ',';
         public static readonly string PathSeparator = "/";
         public static readonly string AkkaConfigurationFileName = "akka.hocon";
     }

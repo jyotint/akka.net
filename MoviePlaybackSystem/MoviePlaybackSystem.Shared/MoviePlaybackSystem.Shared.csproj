@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="akka" Version="1.4.0" />
+    <PackageReference Include="Petabridge.Cmd.Host" Version="0.7.0" />
   </ItemGroup>
 
 </Project>

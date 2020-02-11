@@ -1,61 +1,98 @@
 ﻿using System;
-using MoviePlaybackSystem.Shared;
-using MoviePlaybackSystem.Shared.Actor;
-using MoviePlaybackSystem.Shared.ActorSystemAbstraction;
-using MoviePlaybackSystem.Shared.Message;
+using CommandLine;
 using MoviePlaybackSystem.Shared.Utils;
 
-namespace MoviePlaybackSystem
+namespace MoviePlaybackSystem.ConsoleUI
 {
     class Program
     {
+        private static readonly string CommandSeparator = " ";
+        private static MoviePlaybackSystemHelper _moviePlaybackSystemHelper;
+
         static void Main(string[] args)
         {
             try
             {
-
-                var actorSystem = new ActorSystemHelper();
-
                 ColoredConsole.WriteTitle("MoviePlaybackSystem: Running Akka.NET demo...");
+                ColoredConsole.WriteTemporaryDebugMessage($"Environment.UserInteractive: {Environment.UserInteractive}");
 
-                // Create an ActionSystem
-                ColoredConsole.WriteTitle($"Creating '{Constants.ActorSystemName}' ActorSystem...");
-                actorSystem.CreateActorSystem(Constants.ActorSystemName);
+                _moviePlaybackSystemHelper = new MoviePlaybackSystemHelper();
 
-                RunTests(actorSystem);
+                // Start ActorSystem
+                _moviePlaybackSystemHelper.StartActorSystem();
+                // Run interactive session with user inputting commands
+                RunUserInteractiveSession();
+                // Terminate ActorSystem
+                _moviePlaybackSystemHelper.TerminateActorSystem();
 
-                // Terminate an ActorSystem
-                Console.WriteLine("  Press ENTER key to terminate ActorSystem...");
-                Console.ReadLine();
-                actorSystem.TerminateActorSystem();
-
-                // Wait for user input to terminate the application
-                ColoredConsole.WriteUserPrompt("  Press ENTER key to close the application...");
-                ColoredConsole.WriteUserPrompt("");
+                ColoredConsole.WriteTitle("MoviePlaybackSystem: Quitting Akka.NET demo.");
             }
             catch (Exception ex)
             {
-                ColoredConsole.WriteError($"Exception occurred (type: '{ex.GetType().Name}')");
+                ColoredConsole.WriteError($"MoviePlaybackSystem: Exception occurred (type: '{ex.GetType().Name}')");
                 ColoredConsole.WriteError(ex.Message);
                 ColoredConsole.WriteError(ex.StackTrace);
             }
+            finally
+            {
+                // Terminate ActorSystem
+                _moviePlaybackSystemHelper.TerminateActorSystem();
+                _moviePlaybackSystemHelper = null;
+            }
         }
 
-        private static void RunTests(ActorSystemHelper actorSystemHelper)
+        private static void RunUserInteractiveSession()
         {
-            ActorHelper userCoordinatorActorHelper = actorSystemHelper.CreateActorHelper(UserCoordinatorActor.Props(actorSystemHelper), UserCoordinatorActor.GetActorName());
+            bool quit = false;
 
-            // Send PlayMovieMessage to PlaybackActor
-            userCoordinatorActorHelper.SendMessageAsynchronous(new PlayMovieMessage("Blood Diamond", 42));
-            userCoordinatorActorHelper.SendMessageAsynchronous(new PlayMovieMessage("The Departed", 51));
-            userCoordinatorActorHelper.SendMessageAsynchronous(new PlayMovieMessage("Terminator", 42));
+            // Create Command Line parser
+            ColoredConsole.WriteUserInstructions("HELP: 'help' to list commands. 'help <command>' to get a help for specific command.");
+            // var parser = new CommandLine.Parser(with => with.HelpWriter = null);
+            var parser = CommandLine.Parser.Default;
 
-            // Send StopMovieMessage to UserActor
-            userCoordinatorActorHelper.SendMessageAsynchronous(new StopMovieMessage(42));
-            userCoordinatorActorHelper.SendMessageAsynchronous(new StopMovieMessage(51));
+            do
+            {
+                try
+                {
+                    PauseFor();
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    ColoredConsole.WriteUserPrompt("Enter a command: ");
+                    var commandLineArray = Console.ReadLine().Split(CommandSeparator);
 
-            // Send PlayMovieMessage to PlaybackActor
-            userCoordinatorActorHelper.SendMessageAsynchronous(new PlayMovieMessage("Usual Suspect", 42));
+                    parser.ParseArguments<CommandParser.StartMovieOptions, CommandParser.StopMovieOptions, CommandParser.QuitOptions>(commandLineArray)
+                        .MapResult(
+                            (CommandParser.StartMovieOptions options) =>
+                            {
+                                return _moviePlaybackSystemHelper.StartPlayingMovie(options);
+                            },
+                            (CommandParser.StopMovieOptions options) =>
+                            {
+                                return _moviePlaybackSystemHelper.StopPlayingMovie(options);
+                            },
+                            (CommandParser.QuitOptions options) =>
+                            {
+                                quit = true;
+                                return 0;
+                            },
+                            errs =>
+                            {
+                                return 1;
+                            }
+                        );
+                }
+                catch (Exception ex)
+                {
+                    ColoredConsole.WriteError($"Exception occurred (type: '{ex.GetType().Name}')");
+                    ColoredConsole.WriteError(ex.Message);
+                    ColoredConsole.WriteError(ex.StackTrace);
+                }
+            } while (quit == false);
+        }
+
+        private static void PauseFor(int pauseInMilliSeconds = 1000)
+        {
+            System.Threading.Thread.Sleep(pauseInMilliSeconds);
         }
     }
 }

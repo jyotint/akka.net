@@ -17,14 +17,9 @@ namespace MoviePlaybackSystem.Shared.Actor
             _moviePlayCount = new Dictionary<string, int>();
         }
 
-        public static string GetActorName()
-        {
-            return Constants.ActorNameMoviePlayCounterActor;
-        }
-
         public static Akka.Actor.IActorRef Create()
         {
-            return Context.ActorOf(MoviePlayCounterActor.Props(), GetActorName());
+            return Context.ActorOf(MoviePlayCounterActor.Props(), ActorPaths.MoviePlayCounterActor.Name);
         }
 
         public static Akka.Actor.Props Props()

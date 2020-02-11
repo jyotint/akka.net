@@ -17,14 +17,9 @@ namespace MoviePlaybackSystem.Shared.Actor
             _actorSystemHelper = actorSystemHelper;
         }
 
-        public static string GetActorName()
-        {
-            return Constants.ActorNameUserCoordinatorActor;
-        }
-
         public static Akka.Actor.IActorRef Create(ActorSystemHelper actorSystemHelper)
         {
-            return Context.ActorOf(UserCoordinatorActor.Props(actorSystemHelper), GetActorName());
+            return Context.ActorOf(UserCoordinatorActor.Props(actorSystemHelper), ActorPaths.UserCoordinatorActor.Name);
         }
         public static Akka.Actor.Props Props(ActorSystemHelper actorSystemHelper)
         {
@@ -56,17 +51,16 @@ namespace MoviePlaybackSystem.Shared.Actor
         {
             IActorRef actorRef;
 
-            var childActorName = UserActor.GetActorName(userId);
-            var userActorMetaData = ActorPaths.GetUserActorMetaData(userId.ToString());
+            var childActorMetaData = ActorPaths.GetUserActorMetaData(userId.ToString());
             // ColoredConsole.WriteTemporaryDebugMessage($"User Actor Path: '{userActorMetaData.Path}'");
 
             // Use ResolveOne or Identity message to get the Actor Reference
             // actorRef = _actorSystemHelper.GetActorRefUsingIdentity(userActorMetaData.Path);
-            actorRef = _actorSystemHelper.GetActorRefUsingResolveOne(userActorMetaData.Path);
+            actorRef = _actorSystemHelper.GetActorRefUsingResolveOne(childActorMetaData.Path);
             if(actorRef == null)
             {
-                actorRef = _actorSystemHelper.CreateActor(Context, UserActor.Props(userId), childActorName);
-                ColoredConsole.WriteCreationEvent($"    [{this.ActorName}] '{this.ActorName}' has created new child '{childActorName}' actor for UserId {userId}.");
+                actorRef = _actorSystemHelper.CreateActor(Context, UserActor.Props(userId), childActorMetaData.Name);
+                ColoredConsole.WriteCreationEvent($"    [{this.ActorName}] '{this.ActorName}' has created new child '{childActorMetaData.Name}' actor for UserId {userId}.");
             }
 
             return actorRef;

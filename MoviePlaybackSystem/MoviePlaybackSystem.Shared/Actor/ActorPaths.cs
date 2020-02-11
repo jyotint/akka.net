@@ -14,12 +14,11 @@ namespace MoviePlaybackSystem.Shared.Actor
         public static readonly ActorMetaData PlaybackStatisticsActor = new ActorMetaData(Constants.ActorNamePlaybackStatisticsActor, MoviePlaybackActor);
         public static readonly ActorMetaData MoviePlayCounterActor = new ActorMetaData(Constants.ActorNameMoviePlayCounterActor, PlaybackStatisticsActor);
 
-        // TODO Fix the UserCoordinatorActor actor hierarchy
-        public static readonly ActorMetaData UserCoordinatorActor = new ActorMetaData(Constants.ActorNameUserCoordinatorActor); //, MoviePlaybackActor);
+        public static readonly ActorMetaData UserCoordinatorActor = new ActorMetaData(Constants.ActorNameUserCoordinatorActor, MoviePlaybackActor);
 
         public static ActorMetaData GetUserActorMetaData(string userId)
         {
-            return new ActorMetaData(Constants.ActorNameUserActorPrefix, UserCoordinatorActor, userId);
+            return new ActorMetaData(Constants.ActorNameUserActorPrefix, UserCoordinatorActor, "-" + userId);
         }
     }
 }

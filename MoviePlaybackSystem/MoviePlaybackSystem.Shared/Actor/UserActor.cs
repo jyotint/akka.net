@@ -20,14 +20,9 @@ namespace MoviePlaybackSystem.Shared.Actor
             Become(StoppedBehavior);
         }
 
-        public static string GetActorName(int userId)
-        {
-            return Constants.ActorNameUserActorPrefix + userId; //"-" + userId;
-        }
-
         public static Akka.Actor.IActorRef Create(int userId)
         {
-            return Context.ActorOf(UserActor.Props(userId), GetActorName(userId));
+            return Context.ActorOf(UserActor.Props(userId), ActorPaths.GetUserActorMetaData(userId.ToString()).Name);
         }
 
         public static Akka.Actor.Props Props(int userId)
