@@ -46,7 +46,7 @@ namespace MoviePlaybackSystem.Shared.Utils
         public static void WriteSentMessage(string message) => WriteLineInColor(message, ConsoleColor.Cyan);
         public static void WriteReceivedMessage(string message) => WriteLineInColor(message, ConsoleColor.DarkCyan);
         public static void WriteUserInstructions(string message) => WriteLineInColor(message, ConsoleColor.DarkYellow);
-        public static void WriteUserPrompt(string message) => WriteLineInColor(message, ConsoleColor.DarkYellow);
+        public static void WriteUserPrompt(string message) => WriteInColor(message, ConsoleColor.DarkYellow);
         public static void WriteStateChangeEvent(string message) => WriteLineInColor(message, ConsoleColor.Green);
 
         public static void WriteBehaviorChangeEvent(string message) => WriteLineInColor(message, ConsoleColor.DarkGreen);
@@ -59,6 +59,16 @@ namespace MoviePlaybackSystem.Shared.Utils
             Console.ForegroundColor = color;
 
             Console.WriteLine(message);
+
+            Console.ForegroundColor = beforeForegroundColor;
+        }
+
+        public static void WriteInColor(string message, ConsoleColor color = ConsoleColor.White)
+        {
+            var beforeForegroundColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+
+            Console.Write($"{message} ");
 
             Console.ForegroundColor = beforeForegroundColor;
         }

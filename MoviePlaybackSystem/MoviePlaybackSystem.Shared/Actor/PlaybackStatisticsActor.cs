@@ -17,17 +17,12 @@ namespace MoviePlaybackSystem.Shared.Actor
             ColoredConsole.WriteCreationEvent($"  [{this.ActorName}] '{ActorName}' actor constructor.");
             _actorSystemHelper = actorSystemHelper;
 
-            _moviePlayCounterActor = _actorSystemHelper.CreateActor(Context, MoviePlayCounterActor.Props(), MoviePlayCounterActor.GetActorName());
-        }
-
-        public static string GetActorName()
-        {
-            return Constants.ActorNamePlaybackStatisticsActor;
+            _moviePlayCounterActor = _actorSystemHelper.CreateActor(Context, MoviePlayCounterActor.Props(), ActorPaths.MoviePlayCounterActor.Name);
         }
 
         public static Akka.Actor.IActorRef Create(ActorSystemHelper actorSystemHelper)
         {
-            return Context.ActorOf(PlaybackStatisticsActor.Props(actorSystemHelper), GetActorName());
+            return Context.ActorOf(PlaybackStatisticsActor.Props(actorSystemHelper), ActorPaths.PlaybackStatisticsActor.Name);
         }
 
         public static Akka.Actor.Props Props(ActorSystemHelper actorSystemHelper)

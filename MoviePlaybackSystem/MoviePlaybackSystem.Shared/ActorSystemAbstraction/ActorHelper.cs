@@ -1,3 +1,4 @@
+using System;
 using Akka.Actor;
 using MoviePlaybackSystem.Shared.Utils;
 
@@ -14,6 +15,9 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 
         public void SendMessageAsynchronous(object message)
         {
+            if(ActorRef == null)
+                throw new ArgumentNullException("ActorRef", "Actor Reference not set or is null!");
+                
             ColoredConsole.LogSendAsynchronousMessage(message.GetType().Name, message.ToString(), ActorRef);
             ActorRef.Tell(message);
         }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Configuration;
 using MoviePlaybackSystem.Shared.Utils;
+using Petabridge.Cmd.Host;
 
 namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 {
@@ -17,6 +18,9 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 
             AkkaActorSystem = ActorSystem.Create(actorSystemName, akkaConfig);
             ColoredConsole.WriteCreationEvent($"CREATED '{actorSystemName}' ActorSystem.");
+
+            var petabridgeCmdHost = PetabridgeCmd.Get(AkkaActorSystem);
+            petabridgeCmdHost.Start();
         }
 
         public void TerminateActorSystem()
@@ -49,6 +53,14 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
         public ActorHelper CreateActorHelper(Props props, string actorName)
         {
             IActorRef actorRef = AkkaActorSystem.ActorOf(props, actorName);
+            ColoredConsole.WriteCreationEvent($"CREATED '{actorName}' actor.");
+
+            return new ActorHelper(actorRef);
+        }
+
+        public ActorHelper CreateActorHelper(IUntypedActorContext context, Props props, string actorName)
+        {
+            IActorRef actorRef = context.ActorOf(props, actorName);
             ColoredConsole.WriteCreationEvent($"CREATED '{actorName}' actor.");
 
             return new ActorHelper(actorRef);

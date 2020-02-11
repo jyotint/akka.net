@@ -3,10 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Company>jyotindra.net</Company>
+    <Version>1.0.0</Version>    
+    <Copyright>Copyright (c) 2020 jyotindra.net</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="akka" Version="1.4.0" />
+    <PackageReference Include="CommandLineParser" Version="2.7.82" />
   </ItemGroup>
 
   <ItemGroup>
