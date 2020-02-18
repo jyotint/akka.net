@@ -8,8 +8,10 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
     {
         public CustomUntypedActor()
         {
-            // ColoredConsole.WriteCreationEvent($"CREATING '{Self.Path.Name}' actor with address '{Self.Path.ToString()}'.");
-            // ColoredConsole.WriteCreationEvent($"  Name: '{Self.Path.Name}', '{Self.Path.Uid}', '{Self.Path.Address}', '{Self.Path.Parent}', '{Self.Path.Root}'.");
+            var actorName = Self.Path.Name;
+
+            // ColoredConsole.WriteCreationEvent($"  [{actorName}] CREATING '{actorName}' actor with address '{Self.Path.ToString()}'.");
+            ColoredConsole.WriteCreationEvent($"  [{actorName}] Path: '{Self.Path.ToString()}', UID: '{Self.Path.Uid}', Address: '{Self.Path.Address}', Parent: '{Self.Path.Parent}', Root: '{Self.Path.Root}'.");
         }
 
         #region Public Read-only properties
@@ -47,25 +49,25 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 
         protected override void PreStart()
         {
-            ColoredConsole.WriteLifeCycleEvent($"  Lifecycle event for '{ActorName}' actor: PreStart event hook...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{ActorName}] Lifecycle event: PreStart event hook...");
             base.PreStart();
         }
 
         protected override void PostStop()
         {
-            ColoredConsole.WriteLifeCycleEvent($"  Lifecycle event for '{ActorName}' actor: PostStop event hook...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{ActorName}] Lifecycle event: PostStop event hook...");
             base.PostStop();
         }
 
         protected override void PreRestart(Exception reason, object message)
         {
-            ColoredConsole.WriteLifeCycleEvent($"  Lifecycle event for '{ActorName}' actor: PreRestart event hook (Reason: '{reason.Message}')...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{ActorName}] Lifecycle event: PreRestart event hook (Reason: '{reason.Message}')...");
             base.PreRestart(reason, message);
         }
 
         protected override void PostRestart(Exception reason)
         {
-            ColoredConsole.WriteLifeCycleEvent($"  Lifecycle event for '{ActorName}' actor:  PostRestart event hook (Reason: '{reason.Message}')...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{ActorName}] Lifecycle event: PostRestart event hook (Reason: '{reason.Message}')...");
             base.PostRestart(reason);
         }
 

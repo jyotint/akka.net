@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="akka" Version="1.4.0" />
-    <PackageReference Include="CommandLineParser" Version="2.7.82" />
   </ItemGroup>
 
   <ItemGroup>

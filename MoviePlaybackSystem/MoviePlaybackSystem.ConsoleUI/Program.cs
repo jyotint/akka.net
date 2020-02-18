@@ -1,5 +1,8 @@
 ﻿using System;
 using CommandLine;
+using MoviePlaybackSystem.Shared.Actor;
+using MoviePlaybackSystem.Shared.Helpers;
+using MoviePlaybackSystem.Shared.Message;
 using MoviePlaybackSystem.Shared.Utils;
 
 namespace MoviePlaybackSystem.ConsoleUI
@@ -7,23 +10,22 @@ namespace MoviePlaybackSystem.ConsoleUI
     class Program
     {
         private static readonly string CommandSeparator = " ";
-        private static MoviePlaybackSystemHelper _moviePlaybackSystemHelper;
 
         static void Main(string[] args)
         {
             try
             {
                 ColoredConsole.WriteTitle("MoviePlaybackSystem: Running Akka.NET demo...");
-                ColoredConsole.WriteTemporaryDebugMessage($"Environment.UserInteractive: {Environment.UserInteractive}");
-
-                _moviePlaybackSystemHelper = new MoviePlaybackSystemHelper();
 
                 // Start ActorSystem
-                _moviePlaybackSystemHelper.StartActorSystem();
+                MoviePlaybackSystemHelper.StartActorSystem(true);
+                ActorPaths.LogAllActorPaths();
+
                 // Run interactive session with user inputting commands
                 RunUserInteractiveSession();
+                
                 // Terminate ActorSystem
-                _moviePlaybackSystemHelper.TerminateActorSystem();
+                // MoviePlaybackSystemHelper.TerminateActorSystem();
 
                 ColoredConsole.WriteTitle("MoviePlaybackSystem: Quitting Akka.NET demo.");
             }
@@ -36,8 +38,7 @@ namespace MoviePlaybackSystem.ConsoleUI
             finally
             {
                 // Terminate ActorSystem
-                _moviePlaybackSystemHelper.TerminateActorSystem();
-                _moviePlaybackSystemHelper = null;
+                MoviePlaybackSystemHelper.TerminateActorSystem();
             }
         }
 
@@ -64,11 +65,11 @@ namespace MoviePlaybackSystem.ConsoleUI
                         .MapResult(
                             (CommandParser.StartMovieOptions options) =>
                             {
-                                return _moviePlaybackSystemHelper.StartPlayingMovie(options);
+                                return MoviePlaybackSystemHelper.StartPlayingMovie(new PlayMovieMessage(options.MovieTitle, options.UserId));
                             },
                             (CommandParser.StopMovieOptions options) =>
                             {
-                                return _moviePlaybackSystemHelper.StopPlayingMovie(options);
+                                return MoviePlaybackSystemHelper.StopPlayingMovie(new StopMovieMessage(options.UserId));
                             },
                             (CommandParser.QuitOptions options) =>
                             {

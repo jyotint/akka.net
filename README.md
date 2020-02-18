@@ -24,3 +24,7 @@
     2. Added Petabridge.Cmd
     3. Added ActorMetaData and refactored code
     4. Added user interactive session using CommandLine parser
+6. Git Branch: "mps/feature/006-remoting-actors"
+    1. Added Remote Actor support
+    2. Added "MoviePlaybackSystem.Remote.PlaybackStatisticsActor" project to host Remote "PlaybackStatisticsActor" actor
+    3. More refactoring...
