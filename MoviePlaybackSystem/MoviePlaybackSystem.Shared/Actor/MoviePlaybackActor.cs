@@ -1,3 +1,4 @@
+using Akka.Actor;
 using MoviePlaybackSystem.Shared.ActorSystemAbstraction;
 using MoviePlaybackSystem.Shared.Utils;
 
@@ -5,32 +6,25 @@ namespace MoviePlaybackSystem.Shared.Actor
 {
     public class MoviePlaybackActor : CustomUntypedActor
     {
-        private ActorSystemHelper _actorSystemHelper;
-        public ActorHelper UserCoordinatorActorHelper { get; private set; }
-        public ActorHelper PlaybackStatisticsActorHelper { get; private set; }
+        public IActorRef UserCoordinatorActorRef { get; private set; }
+        public IActorRef PlaybackStatisticsActorRef { get; private set; }
 
-        public MoviePlaybackActor(ActorSystemHelper actorSystemHelper)
+        public MoviePlaybackActor()
             : base()
         {
             ColoredConsole.WriteCreationEvent($"  [{this.ActorName}] '{ActorName}' actor constructor.");
-            _actorSystemHelper = actorSystemHelper;
 
-            UserCoordinatorActorHelper = _actorSystemHelper.CreateActorHelper(Context, UserCoordinatorActor.Props(_actorSystemHelper), ActorPaths.UserCoordinatorActor.Name);
-            PlaybackStatisticsActorHelper = _actorSystemHelper.CreateActorHelper(Context, PlaybackStatisticsActor.Props(_actorSystemHelper), ActorPaths.PlaybackStatisticsActor.Name);
+            UserCoordinatorActorRef = ActorSystemHelper.CreateActorHelper(Context, UserCoordinatorActor.Props(), ActorPaths.UserCoordinatorActor.Name);
+            PlaybackStatisticsActorRef = ActorSystemHelper.CreateActorHelper(Context, PlaybackStatisticsActor.Props(), ActorPaths.PlaybackStatisticsActor.Name);
         }
 
-        public static Akka.Actor.IActorRef Create(ActorSystemHelper actorSystemHelper)
+        public static Akka.Actor.IActorRef Create()
         {
-            return actorSystemHelper.CreateActor(MoviePlaybackActor.Props(actorSystemHelper), ActorPaths.MoviePlaybackActor.Name);
+            return ActorSystemHelper.CreateActor(MoviePlaybackActor.Props(), ActorPaths.MoviePlaybackActor.Name);
         }
-        public static ActorHelper CreateActorHelper(ActorSystemHelper actorSystemHelper)
+        public static Akka.Actor.Props Props()
         {
-            return new ActorHelper(Create(actorSystemHelper));
-        }
-
-        public static Akka.Actor.Props Props(ActorSystemHelper actorSystemHelper)
-        {
-            return Akka.Actor.Props.Create(() => new MoviePlaybackActor(actorSystemHelper));
+            return Akka.Actor.Props.Create(() => new MoviePlaybackActor());
         }
 
         override protected void OnReceive(object message)

@@ -8,33 +8,31 @@ namespace MoviePlaybackSystem.Shared.Actor
 {
     public class PlaybackStatisticsActor : CustomUntypedActor
     {
-        private ActorSystemHelper _actorSystemHelper;
         private IActorRef _moviePlayCounterActor;
 
-        public PlaybackStatisticsActor(ActorSystemHelper actorSystemHelper)
+        public PlaybackStatisticsActor()
             : base()
         {
             ColoredConsole.WriteCreationEvent($"  [{this.ActorName}] '{ActorName}' actor constructor.");
-            _actorSystemHelper = actorSystemHelper;
 
-            _moviePlayCounterActor = _actorSystemHelper.CreateActor(Context, MoviePlayCounterActor.Props(), ActorPaths.MoviePlayCounterActor.Name);
+            _moviePlayCounterActor = Context.ActorOf(MoviePlayCounterActor.Props(), ActorPaths.MoviePlayCounterActor.Name);
         }
 
-        public static Akka.Actor.IActorRef Create(ActorSystemHelper actorSystemHelper)
+        public static Akka.Actor.IActorRef Create()
         {
-            return Context.ActorOf(PlaybackStatisticsActor.Props(actorSystemHelper), ActorPaths.PlaybackStatisticsActor.Name);
+            return Context.ActorOf(PlaybackStatisticsActor.Props(), ActorPaths.PlaybackStatisticsActor.Name);
         }
 
-        public static Akka.Actor.Props Props(ActorSystemHelper actorSystemHelper)
+        public static Akka.Actor.Props Props()
         {
-            return Akka.Actor.Props.Create<PlaybackStatisticsActor>(() => new PlaybackStatisticsActor(actorSystemHelper));
+            return Akka.Actor.Props.Create<PlaybackStatisticsActor>(() => new PlaybackStatisticsActor());
         }
 
         override protected void OnReceive(object message)
         {
             if(message is IncrementMoviePlayCountMessage msg)
             {
-                _actorSystemHelper.SendAsynchronousMessage(_moviePlayCounterActor, msg);
+                _moviePlayCounterActor.Tell(message);
             }
             else
             {

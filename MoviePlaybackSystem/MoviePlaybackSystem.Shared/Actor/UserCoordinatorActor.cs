@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Akka.Actor;
 using MoviePlaybackSystem.Shared.ActorSystemAbstraction;
 using MoviePlaybackSystem.Shared.Message;
@@ -8,22 +7,19 @@ namespace MoviePlaybackSystem.Shared.Actor
 {
     public class UserCoordinatorActor : CustomUntypedActor
     {
-        private ActorSystemHelper _actorSystemHelper;
-
-        public UserCoordinatorActor(ActorSystemHelper actorSystemHelper)
+        public UserCoordinatorActor()
             : base()
         {
             ColoredConsole.WriteCreationEvent($"  [{this.ActorName}] '{ActorName}' actor constructor.");
-            _actorSystemHelper = actorSystemHelper;
         }
 
-        public static Akka.Actor.IActorRef Create(ActorSystemHelper actorSystemHelper)
+        public static Akka.Actor.IActorRef Create()
         {
-            return Context.ActorOf(UserCoordinatorActor.Props(actorSystemHelper), ActorPaths.UserCoordinatorActor.Name);
+            return Context.ActorOf(UserCoordinatorActor.Props(), ActorPaths.UserCoordinatorActor.Name);
         }
-        public static Akka.Actor.Props Props(ActorSystemHelper actorSystemHelper)
+        public static Akka.Actor.Props Props()
         {
-            return Akka.Actor.Props.Create(() => new UserCoordinatorActor(actorSystemHelper));
+            return Akka.Actor.Props.Create(() => new UserCoordinatorActor());
         }
 
         override protected void OnReceive(object message)
@@ -34,11 +30,11 @@ namespace MoviePlaybackSystem.Shared.Actor
             {
                 case PlayMovieMessage pmm:
                     actorRef = CreateOrGetChildActor(pmm.UserId);
-                    _actorSystemHelper.SendAsynchronousMessage(actorRef, message);
+                    ActorSystemHelper.SendAsynchronousMessage(actorRef, message);
                     break;
                 case StopMovieMessage smm:
                     actorRef = CreateOrGetChildActor(smm.UserId);
-                    _actorSystemHelper.SendAsynchronousMessage(actorRef, message);
+                    ActorSystemHelper.SendAsynchronousMessage(actorRef, message);
                     break;
                 default:
                     ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] OnReceive(): ERROR: Unknown '{message.GetType().ToString()}' type received!");
@@ -56,10 +52,10 @@ namespace MoviePlaybackSystem.Shared.Actor
 
             // Use ResolveOne or Identity message to get the Actor Reference
             // actorRef = _actorSystemHelper.GetActorRefUsingIdentity(userActorMetaData.Path);
-            actorRef = _actorSystemHelper.GetActorRefUsingResolveOne(childActorMetaData.Path);
+            actorRef = ActorSystemHelper.GetActorRefUsingResolveOne(childActorMetaData.Path);
             if(actorRef == null)
             {
-                actorRef = _actorSystemHelper.CreateActor(Context, UserActor.Props(userId), childActorMetaData.Name);
+                actorRef = ActorSystemHelper.CreateActor(Context, UserActor.Props(userId), childActorMetaData.Name);
                 ColoredConsole.WriteCreationEvent($"    [{this.ActorName}] '{this.ActorName}' has created new child '{childActorMetaData.Name}' actor for UserId {userId}.");
             }
 

@@ -16,7 +16,7 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
             }
             else
             {
-                throw new FileNotFoundException($"'{hoconConfigFileName}' configuration file is missing!", hoconConfigFileName);
+                throw new FileNotFoundException($"EXCEPTION: '{hoconConfigFileName}' configuration file is missing!", hoconConfigFileName);
             }
 
             return akkaConfig;

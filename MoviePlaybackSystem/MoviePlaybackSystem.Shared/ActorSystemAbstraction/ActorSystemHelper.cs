@@ -7,42 +7,54 @@ using Petabridge.Cmd.Host;
 
 namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 {
-    public class ActorSystemHelper
+    public static class ActorSystemHelper
     {
-        public ActorSystem AkkaActorSystem { get; private set; }
+        public static ActorSystem AkkaActorSystem { get; private set; }
 
-        public void CreateActorSystem(string actorSystemName)
+        public static void CreateActorSystem(string actorSystemName)
         {
             // Read Akka configuration and create an ActionSystem
-            Config akkaConfig = HoconConfiguration.ReadAndParse(Constants.AkkaConfigurationFileName);
+            Config config = HoconConfiguration.ReadAndParse(Constants.AkkaConfigurationFileName);
+            ColoredConsole.WriteTitle($"Application Name: {config.GetString("application.info.name")}");
 
-            AkkaActorSystem = ActorSystem.Create(actorSystemName, akkaConfig);
-            ColoredConsole.WriteCreationEvent($"CREATED '{actorSystemName}' ActorSystem.");
+            if (AkkaActorSystem == null)
+            {
+                AkkaActorSystem = ActorSystem.Create(actorSystemName, config);
+                ColoredConsole.WriteCreationEvent($"CREATED '{actorSystemName}' ActorSystem.");
+            }
 
-            var petabridgeCmdHost = PetabridgeCmd.Get(AkkaActorSystem);
+            var petabridgeCmdHost = PetabridgeCmd.Get(GetAkkaActorSystem());
+            petabridgeCmdHost.RegisterCommandPalette(Petabridge.Cmd.Remote.RemoteCommands.Instance);
             petabridgeCmdHost.Start();
         }
 
-        public void TerminateActorSystem()
+        public static void TerminateActorSystem()
         {
             // Notify ActorSystem (and all child actors) to temrinate 
-            ColoredConsole.WriteCreationEvent($"TERMINATING '{AkkaActorSystem.Name}' ActorSystem.");
+            ColoredConsole.WriteCreationEvent($"TERMINATING '{GetAkkaActorSystem().Name}' ActorSystem.");
             AkkaActorSystem.Terminate();
 
             // Wait for ActorSystem to finish shutting down
             Task whenTerminatedTask = AkkaActorSystem.WhenTerminated;
             whenTerminatedTask.Wait();
+
+            AkkaActorSystem = null;
         }
 
-        public IActorRef CreateActor(Props props, string actorName)
+        public static ActorSystem GetAkkaActorSystem()
         {
-            IActorRef actorRef = AkkaActorSystem.ActorOf(props, actorName);
+            return ActorSystemHelper.AkkaActorSystem;
+        }
+
+        public static IActorRef CreateActor(Props props, string actorName)
+        {
+            IActorRef actorRef = GetAkkaActorSystem().ActorOf(props, actorName);
             ColoredConsole.WriteCreationEvent($"CREATED '{actorName}' actor.");
 
             return actorRef;
         }
 
-        public IActorRef CreateActor(IUntypedActorContext context, Props props, string actorName)
+        public static IActorRef CreateActor(IUntypedActorContext context, Props props, string actorName)
         {
             IActorRef actorRef = context.ActorOf(props, actorName);
             ColoredConsole.WriteCreationEvent($"CREATED '{actorName}' actor.");
@@ -50,49 +62,52 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
             return actorRef;
         }
 
-        public ActorHelper CreateActorHelper(Props props, string actorName)
+        public static IActorRef CreateActorHelper(Props props, string actorName)
         {
-            IActorRef actorRef = AkkaActorSystem.ActorOf(props, actorName);
+            IActorRef actorRef = GetAkkaActorSystem().ActorOf(props, actorName);
             ColoredConsole.WriteCreationEvent($"CREATED '{actorName}' actor.");
 
-            return new ActorHelper(actorRef);
+            return actorRef;
         }
 
-        public ActorHelper CreateActorHelper(IUntypedActorContext context, Props props, string actorName)
+        public static IActorRef CreateActorHelper(IUntypedActorContext context, Props props, string actorName)
         {
             IActorRef actorRef = context.ActorOf(props, actorName);
             ColoredConsole.WriteCreationEvent($"CREATED '{actorName}' actor.");
 
-            return new ActorHelper(actorRef);
+            return actorRef;
         }
 
-        public void SendAsynchronousMessage(IActorRef actorRef, object message)
+        public static void SendAsynchronousMessage(IActorRef actorRef, object message)
         {
+            if(actorRef == null)
+                throw new ArgumentNullException("ActorRef", "Actor Reference not set or is null!");
+
             ColoredConsole.LogSendAsynchronousMessage(message.GetType().Name, message.ToString(), actorRef);
             actorRef.Tell(message);
         }
 
-        // public T SendSynchronousMessage<T>(IActorRef actorRef, object message, TimeSpan timeout)
+        // public static T SendSynchronousMessage<T>(IActorRef actorRef, object message, TimeSpan timeout)
         // {
         //     ColoredConsole.LogSendSynchronousMessage(message.GetType().Name, message.ToString(), actorRef);
         //     return actorRef.Ask<T>(message, timeout).Result;
         // }
 
-        public T SendSynchronousMessage<T>(ActorSelection actorSelection, object message, TimeSpan timeout)
+        public static T SendSynchronousMessage<T>(ActorSelection actorSelection, object message, TimeSpan timeout)
         {
             ColoredConsole.LogSendSynchronousMessage(message.GetType().Name, message.ToString(), actorSelection);
             return actorSelection.Ask<T>(message, timeout).Result;
         }
-        public IActorRef GetActorRefUsingIdentity(string actorPath)
+        public static IActorRef GetActorRefUsingIdentity(string actorPath)
         {
             IActorRef actorRef = null;
 
             try
             {
                 var randomId = (new Random()).Next(1, 10000);
-                var selection = AkkaActorSystem.ActorSelection(actorPath);
+                var selection = GetAkkaActorSystem().ActorSelection(actorPath);
                 var identity = SendSynchronousMessage<ActorIdentity>(selection, new Identify(randomId), TimeSpan.FromSeconds(30));
-                if(System.Convert.ToInt32(identity.MessageId) == randomId)
+                if (System.Convert.ToInt32(identity.MessageId) == randomId)
                 {
                     return identity.Subject;
                 }
@@ -105,13 +120,13 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
             return actorRef;
         }
 
-        public IActorRef GetActorRefUsingResolveOne(string actorPath)
+        public static IActorRef GetActorRefUsingResolveOne(string actorPath)
         {
             IActorRef actorRef = null;
 
             try
             {
-                var selection = AkkaActorSystem.ActorSelection(actorPath);
+                var selection = GetAkkaActorSystem().ActorSelection(actorPath);
                 actorRef = selection.ResolveOne(new TimeSpan(0, 0, 30)).Result;
             }
             catch (ActorNotFoundException)

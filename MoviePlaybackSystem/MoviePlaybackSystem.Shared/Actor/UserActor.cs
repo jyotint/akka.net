@@ -34,12 +34,12 @@ namespace MoviePlaybackSystem.Shared.Actor
         {
             ColoredConsole.WriteReceivedMessage($"  [{this.ActorName}] OnReceive(): Received Message on '{this.ActorName}' Actor...");
 
-            switch(message)
+            switch (message)
             {
-                case PlayMovieMessage pmm:
+                case PlayMovieMessage msg:
                     Become(PlayingMovieBehavior);
                     break;
-                case StopMovieMessage smm:
+                case StopMovieMessage msg:
                     Become(StoppedBehavior);
                     break;
                 default:
@@ -51,39 +51,47 @@ namespace MoviePlaybackSystem.Shared.Actor
 
         private void PlayingMovieBehavior(object message)
         {
-            switch(message)
+            switch (message)
             {
-                case PlayMovieMessage pmm:
-                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] ERROR: Already playing movie! PlayMovieMessage message received --> {pmm.ToString()}.");
+                case PlayMovieMessage msg:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] ERROR: Already playing movie! PlayMovieMessage message received --> {msg.ToString()}.");
                     break;
-                case StopMovieMessage smm:
-                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] StopMovieMessage message received --> {smm.ToString()}.");
-                    StopPlayingMovie(smm);
+                case StopMovieMessage msg:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] StopMovieMessage message received --> {msg.ToString()}.");
+                    StopPlayingMovie(msg);
                     break;
             }
         }
 
         private void StoppedBehavior(object message)
         {
-            switch(message)
+            switch (message)
             {
-                case PlayMovieMessage pmm:
-                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] PlayMovieMessage message received --> {pmm.ToString()}.");
-                    StartPlayingMovie(pmm);
+                case PlayMovieMessage msg:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] PlayMovieMessage message received --> {message.ToString()}.");
+                    StartPlayingMovie(msg);
                     break;
-                case StopMovieMessage smm:
-                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] ERROR: Can't stop if nothing is playing! StopMovieMessage message received --> {smm.ToString()}.");
+                case StopMovieMessage msg:
+                    ColoredConsole.WriteReceivedMessage($"    [{this.ActorName}] ERROR: Can't stop if nothing is playing! StopMovieMessage message received --> {msg.ToString()}.");
                     break;
             }
         }
 
-        private void StartPlayingMovie(PlayMovieMessage pmm)
+        private void StartPlayingMovie(PlayMovieMessage message)
         {
-            _currentlyPlaying = pmm;
+            _currentlyPlaying = message;
+            
+            // Context.ActorSelection(ActorPaths.MoviePlayCounterActor.Path).Tell(new IncrementMoviePlayCountMessage(message.MovieTitle, 1));
+            var actorRef = ActorSystemHelper.GetActorRefUsingResolveOne(ActorPaths.MoviePlayCounterActor.Path);
+            if (actorRef != null)
+            {
+                ActorSystemHelper.SendAsynchronousMessage(actorRef, new IncrementMoviePlayCountMessage(message.MovieTitle, 1));
+            }
+
             Become(PlayingMovieBehavior);
         }
 
-        private void StopPlayingMovie(StopMovieMessage smm)
+        private void StopPlayingMovie(StopMovieMessage message)
         {
             _currentlyPlaying = null;
             Become(StoppedBehavior);

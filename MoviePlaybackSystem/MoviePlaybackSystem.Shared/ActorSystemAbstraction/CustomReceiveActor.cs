@@ -12,8 +12,8 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
         {
             _actorName = Self.Path.Name;
 
-            ColoredConsole.WriteCreationEvent($"CREATED '{_actorName}' actor with address '{Self.Path.ToString()}'.");
-            //ColoredConsole.WriteCreationEvent($"  Name: '{Self.Path.Name}', '{Self.Path.Uid}', '{Self.Path.Address}', '{Self.Path.Parent}', '{Self.Path.Root}'.");
+            // ColoredConsole.WriteCreationEvent($"  [{_actorName}] CREATED '{_actorName}' actor with address '{Self.Path.ToString()}'.");
+            ColoredConsole.WriteCreationEvent($"  [{_actorName}] Name: '{Self.Path.Name}', '{Self.Path.Uid}', '{Self.Path.Address}', '{Self.Path.Parent}', '{Self.Path.Root}'.");
         }
 
 
@@ -21,25 +21,25 @@ namespace MoviePlaybackSystem.Shared.ActorSystemAbstraction
 
         protected override void PreStart()
         {
-            ColoredConsole.WriteLifeCycleEvent($"PreStart event hook for '{_actorName}' actor...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{_actorName}] PreStart event hook...");
             base.PreStart();
         }
 
         protected override void PostStop()
         {
-            ColoredConsole.WriteLifeCycleEvent($"PostStop event hook for '{_actorName}' actor...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{_actorName}] PostStop event hook...");
             base.PostStop();
         }
 
         protected override void PreRestart(Exception reason, object message)
         {
-            ColoredConsole.WriteLifeCycleEvent($"PreRestart event hook for '{_actorName}' actor (Reason: '{reason.Message}')...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{_actorName}] PreRestart event hook (Reason: '{reason.Message}')...");
             base.PreRestart(reason, message);
         }
 
         protected override void PostRestart(Exception reason)
         {
-            ColoredConsole.WriteLifeCycleEvent($"PostRestart event hook for '{_actorName}' actor (Reason: '{reason.Message}')...");
+            ColoredConsole.WriteLifeCycleEvent($"  [{_actorName}] PostRestart event hook (Reason: '{reason.Message}')...");
             base.PostRestart(reason);
         }
 
